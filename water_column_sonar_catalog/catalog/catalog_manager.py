@@ -16,39 +16,35 @@ https://stacspec.org/en/tutorials/4-create-stac-collection/
 """
 
 tmp_dir = TemporaryDirectory()
+
+
 # img_path1 = os.path.join(tmp_dir.name, 'image1.tif')
 # url1 = 'https://www.ncei.noaa.gov/sites/default/files/2022-03/AllBeamCurtains_griddedMultibeam-102-file-good-bathy442x185.jpg'
 # urllib.request.urlretrieve(url1, img_path1)
 
 
+# good tutorial https://stacspec.org/en/tutorials/4-create-stac-collection/
 class CatalogManager:
     def __init__(
         self,
     ):
         self.__overwrite = True
-        self.provider_noaa = pystac.Provider(
-            name="NOAA National Centers for Environmental Information",
-            description="In collaboration with NOAA's National Marine Fisheries Service (NMFS) and the University of Colorado Boulder, NOAA’s National Centers for Environmental Information (NCEI) established a national archive for water column sonar data. This project entails ensuring the long-term stewardship of well-documented water column sonar data, and enabling discovery and access to researchers and the public around the world.",
-            roles=[pystac.ProviderRole.LICENSOR],
-            url="https://www.noaa.gov/",
-            # extra_fields: dict[str, Any] | None = None,
-        )
         self.provider_national_centers_for_environmental_information = pystac.Provider(
             name="NOAA National Centers for Environmental Information",
             description="In collaboration with NOAA's National Marine Fisheries Service (NMFS) and the University of Colorado Boulder, NOAA’s National Centers for Environmental Information (NCEI) established a national archive for water column sonar data. This project entails ensuring the long-term stewardship of well-documented water column sonar data, and enabling discovery and access to researchers and the public around the world.",
-            roles=[pystac.ProviderRole.HOST],
+            roles=[pystac.ProviderRole.HOST, pystac.ProviderRole.LICENSOR],
             url="https://www.ncei.noaa.gov/",
             # extra_fields: dict[str, Any] | None = None,
         )
         self.provider_marine_geology_and_geophysics = pystac.Provider(
-            name="Marine Geological and Geophysical Data Management at NCEI",
+            name="NCEI Marine Geology and Geophysics",
             description="The NOAA National Centers for Environmental Information (NCEI) are part of the US Department of Commerce, National Oceanic and Atmospheric Administration (NOAA), National Environmental Satellite, Data, and Information Service (NESDIS).",
             roles=[pystac.ProviderRole.PRODUCER],
             url="https://www.ngdc.noaa.gov/mgg/aboutmgg/aboutmgg.html",
             # extra_fields: dict[str, Any] | None = None,
         )
         self.provider_cooperative_institute_for_research_in_environmental_sciences = pystac.Provider(
-            name="Cooperative Institute for Research In Environmental Sciences",
+            name="CU Cooperative Institute for Research In Environmental Sciences",
             description="At CIRES, the Cooperative Institute for Research In Environmental Sciences, hundreds of scientists work to understand the dynamic Earth system, including people’s relationship with the planet",
             roles=[pystac.ProviderRole.PROCESSOR],
             url="https://cires.colorado.edu/",
@@ -71,8 +67,8 @@ class CatalogManager:
             # catalog.describe()
             # #
 
-            get_cruise = GetCruise()  # Read in HB1906 cruise
-            cruise = get_cruise.get_cruise()
+            cruise_manager = CruiseManager()  # Read in HB1906 cruise
+            cruise = cruise_manager.get_cruise()
 
             # --- CATALOG --- #
             level_2_catalog = pystac.Catalog(
@@ -92,8 +88,8 @@ class CatalogManager:
 
             # --- COLLECTION --- #
             ### bbox ###
-            get_cruise_bounding_box = GetCruiseBoundingBox()
-            bbox, footprint, geojson = get_cruise_bounding_box.get_bounding_box()
+            geospatial_manager = GeospatialManager()
+            bbox, footprint, geojson = geospatial_manager.get_bounding_box()
 
             #### dates ###
             start_datetime = pd.Timestamp(cruise.time.values[0])
@@ -193,8 +189,8 @@ class CatalogManager:
 
 ### TODO: follow zarr guide here: https://element84.com/software-engineering/zarr-stac/
 if __name__ == "__main__":
-    create_catalog = CreateCatalog()
-    new_catalog = create_catalog.create_level_2_catalog()
+    catalog_manager = CatalogManager()
+    new_catalog = catalog_manager.create_level_2_catalog()
     new_catalog.describe()
     print(new_catalog)
     print(new_catalog.get_self_href())
@@ -216,4 +212,45 @@ if __name__ == "__main__":
 * <Catalog id=water-column-sonar-level-2>
     * <Collection id=HB1906>
       * <Item id=HB1906.zarr>
+
+
+
+https://noaa-wcsd-pds.s3.amazonaws.com/index.html#data/raw/Henry_B._Bigelow/HB1906/
+### raw data ###      
+* <Catalog id=water-column-sonar-level-0>
+    * <Collection id=HB1906>
+      * <Item id=D20190903-T171901.raw> EK60
+      * <Item id=D20190903-T171901.bot>
+      * <Item id=D20190903-T171901.idx geometry= bbox= datetime= properties=SHIP start_datetime= end_datetime= href= collection= assets= >
+      ...
+      * <Item id=HB-D20190903-T171908.raw> ME70
+      ...
+      <Asset id=HBBigelow_018kHz_20August2019.cal>
+      <Asset id=D20190903-T171901-D20190904-T093044.xml>
+      ...
+    * <Collection id=HB0707>
+      * <Item id=D20070711-T182032.raw>
+      ...
+    ...
+### file level zarr stores ###
+* <Catalog id=water-column-sonar-level-1>
+    * <Collection id=HB1906>
+      * <Item id=D20190903-T171901.zarr geometry= bbox= datetime=X properties= start_datetime= end_datetime= stac_extensions=X href= collection= extra_fields= assets= >
+      * <Item id=D20190903-T171901.nc>
+      * <Item id=D20190903-T175930.zarr>
+      * <Item id=D20190903-T175930.nc>
+      * <Item id=D20190903-T183959.zarr>
+      * <Item id=D20190903-T183959.nc>
+### cruise level zarr store ###
+* <Catalog id=water-column-sonar-level-2>
+    * <Collection id=HB1906>
+      * <Item id=HB1906.zarr> <-- this should be 'HB1906_EK60.zarr'
+      * <Item id=HB1906_int8.zarr>
+
+
+Catalog(id: 'str', description: 'str', title: 'str | None' = None, stac_extensions: 'list[str] | None' = None, extra_fields: 'dict[str, Any] | None' = None, href: 'str | None' = None, catalog_type: 'CatalogType' = 'ABSOLUTE_PUBLISHED', strategy: 'HrefLayoutStrategy | None' = None)
+Collection(id: 'str', description: 'str', extent: 'Extent', title: 'str | None' = None, stac_extensions: 'list[str] | None' = None, href: 'str | None' = None, extra_fields: 'dict[str, Any] | None' = None, catalog_type: 'CatalogType | None' = None, license: 'str' = 'other', keywords: 'list[str] | None' = None, providers: 'list[Provider] | None' = None, summaries: 'Summaries | None' = None, assets: 'dict[str, Asset] | None' = None, strategy: 'HrefLayoutStrategy | None' = None)
+Item(id: 'str', geometry: 'dict[str, Any] | None', bbox: 'list[float] | None', datetime: 'Datetime | None', properties: 'dict[str, Any]', start_datetime: 'Datetime | None' = None, end_datetime: 'Datetime | None' = None, stac_extensions: 'list[str] | None' = None, href: 'str | None' = None, collection: 'str | Collection | None' = None, extra_fields: 'dict[str, Any] | None' = None, assets: 'dict[str, Asset] | None' = None)
+Asset(href: 'str', title: 'str | None' = None, description: 'str | None' = None, media_type: 'str | None' = None, roles: 'list[str] | None' = None, extra_fields: 'dict[str, Any] | None' = None) -> 'None'
+
 """

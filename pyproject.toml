@@ -2,10 +2,10 @@
 name = "water_column_sonar_catalog"
 version = "26.2.0"
 authors = [
-  { name="Rudy Klucik", email="rudy.klucik@noaa.gov" },
+    { name = "Rudy Klucik", email = "rudy.klucik@noaa.gov" },
 ]
 maintainers = [
-  { name="Rudy Klucik", email="rudy.klucik@noaa.gov" },
+    { name = "Rudy Klucik", email = "rudy.klucik@noaa.gov" },
 ]
 description = "STAC Catalog for Water Column Sonar Data"
 keywords = ["ocean", "sonar", "water column"]
@@ -20,24 +20,11 @@ license-files = ["LICENSE"]
 
 # uv sync --all-groups --upgrade
 dependencies = [
-    "fiona",
     "geopandas",
-    "multidict",
-    "networkx",
     "numpy",
     "pandas",
-    "pooch",
-    "pyarrow",
     "pystac",
-    "python-dotenv",
-    "rasterio",
-    "s3fs",
-    "scipy",
     "shapely",
-    "setuptools",
-    "shapely",
-    "xarray[complete]",
-    "xbatcher",
 ]
 
 # uv sync --all-groups --upgrade
