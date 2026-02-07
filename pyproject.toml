@@ -24,7 +24,11 @@ dependencies = [
     "numpy",
     "pandas",
     "pystac",
+    "s3fs",
     "shapely",
+    "xarray",
+    "xpystac",
+    "zarr",
 ]
 
 # uv sync --all-groups --upgrade

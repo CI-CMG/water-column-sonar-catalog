@@ -16,9 +16,9 @@ class GeospatialManager:
         self,
     ):
         self.__overwrite = True
+        self.simplification_tolerance = 0.1
 
-    @staticmethod
-    def get_bounding_box():
+    def get_bounding_box(self):
         try:
             # bucket_name = "noaa-wcsd-zarr-pds"
             # ship_name = "Henry_B._Bigelow"
@@ -62,7 +62,7 @@ class GeospatialManager:
             ]
             ### simplify geometry
             geom_simplified = LineString(list(zip(longitude, latitude))).simplify(
-                tolerance=0.01,  # preserve_topology=True # 113
+                tolerance=self.simplification_tolerance,  # preserve_topology=True # 113
             )
             gdf_simplified = gpd.GeoDataFrame(
                 {"geometry": [geom_simplified]}, crs="EPSG:4326"

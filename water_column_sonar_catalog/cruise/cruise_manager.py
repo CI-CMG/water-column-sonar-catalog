@@ -15,10 +15,12 @@ class CruiseManager:
             level = "level_2a"
             ship_name = "Henry_B._Bigelow"
             cruise_name = "HB1906"
-            sensor_name = "EK60"
+            instrument_name = "EK60"
             zarr_store = f"{cruise_name}.zarr"
-            s3_zarr_store_path = f"{bucket_name}/{level}/{ship_name}/{cruise_name}/{sensor_name}/{zarr_store}"
+            s3_zarr_store_path = f"{bucket_name}/{level}/{ship_name}/{cruise_name}/{instrument_name}/{zarr_store}"
             kwargs = {"consolidated": False}
+            # foo = xr.open_dataset(filename_or_obj=asset, **kwargs)
+            # print(foo)
             return xr.open_dataset(
                 filename_or_obj=f"s3://{s3_zarr_store_path}",
                 engine="zarr",

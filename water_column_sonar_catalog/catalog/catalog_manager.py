@@ -3,6 +3,7 @@ from tempfile import TemporaryDirectory
 
 import pandas as pd
 import pystac
+import xarray as xr
 
 from water_column_sonar_catalog.cruise import CruiseManager
 from water_column_sonar_catalog.geospatial import GeospatialManager
@@ -27,8 +28,13 @@ tmp_dir = TemporaryDirectory()
 class CatalogManager:
     def __init__(
         self,
+        ship_name: str = "Henry_B._Bigelow",
+        cruise_name: str = "HB1906",
+        instrument_name: str = "EK60",
     ):
-        self.__overwrite = True
+        self.ship_name = ship_name
+        self.cruise_name = cruise_name
+        self.instrument_name = instrument_name
         self.provider_national_centers_for_environmental_information = pystac.Provider(
             name="NOAA National Centers for Environmental Information",
             description="In collaboration with NOAA's National Marine Fisheries Service (NMFS) and the University of Colorado Boulder, NOAA’s National Centers for Environmental Information (NCEI) established a national archive for water column sonar data. This project entails ensuring the long-term stewardship of well-documented water column sonar data, and enabling discovery and access to researchers and the public around the world.",
@@ -52,22 +58,10 @@ class CatalogManager:
         )
 
     def create_level_2_catalog(self):
-        """Cruise level Zarr store catalog"""
+        """Cruise Level Zarr store Catalog"""
         try:
-            # catalog = pystac.Catalog(id="test-catalog", description="Tutorial catalog.")
-            # item = pystac.Item(
-            #     id="local-image",
-            #     geometry=None,
-            #     bbox=None,
-            #     datetime=datetime.utcnow(),
-            #     properties={},
-            # )
-            # catalog.add_item(item)
-            # item.get_parent()
-            # catalog.describe()
-            # #
-
-            cruise_manager = CruiseManager()  # Read in HB1906 cruise
+            ### Read in HB1906 cruise ###
+            cruise_manager = CruiseManager()
             cruise = cruise_manager.get_cruise()
 
             # --- CATALOG --- #
@@ -103,21 +97,28 @@ class CatalogManager:
 
             level_2_collection = pystac.Collection(
                 id="HB1906",  # cruise name
-                description="Level 2 water column sonar data from the NOAA Nation Centers for Environmental Information",
+                description="Level 2 water column sonar data from the Henry_B._Bigelow HB1906 cruise",
                 extent=extent,
                 title="Henry_B._Bigelow HB1906 Zarr Stores",
                 # stac_extensions: 'list[str] | None' = None,
                 href="https://noaa-wcsd-zarr-pds.s3.amazonaws.com/index.html#level_2a/",
                 catalog_type=pystac.CatalogType.ABSOLUTE_PUBLISHED,
                 # license: 'str' = 'other',
-                keywords=["oceanography", "water column", "sonar"],
+                keywords=[
+                    "ocean",
+                    "oceanography",
+                    "marine",
+                    "water column",
+                    "sonar",
+                    "fish",
+                ],
                 providers=[
                     self.provider_cooperative_institute_for_research_in_environmental_sciences,
                     self.provider_marine_geology_and_geophysics,
                     self.provider_national_centers_for_environmental_information,
-                    self.provider_noaa,
                 ],
                 # summaries: 'Summaries | None' = None, # An optional map of property summaries, either a set of values or statistics such as a range.
+                # TODO: for assets, would include XML, metadata
                 # assets: 'dict[str, Asset] | None' = None,
                 # strategy: 'HrefLayoutStrategy | None' = None,
             )
@@ -127,14 +128,15 @@ class CatalogManager:
 
             # --- ITEM --- #
             level_2_item = pystac.Item(
-                id="HB1906.zarr",
+                id=f"{self.instrument_name}",  # EK60.zarr vs ME70.zarr
                 geometry=geojson,
                 bbox=bbox,
                 datetime=None,
                 properties=dict(
-                    ship_name="Henry_B._Bigelow",
-                    cruise_name="HB1906",
-                    instrument="EK60",
+                    ship_name=self.ship_name,
+                    cruise_name=self.cruise_name,
+                    instrument_name=self.instrument_name,
+                    #
                     processing_software_name="echofish",
                     processing_software_version="26.1.14",
                     processing_software_time="2026-01-20T09:39:09.116Z",
@@ -150,12 +152,24 @@ class CatalogManager:
                 # extra_fields: 'dict[str, Any] | None' = None,
                 # assets: 'dict[str, Asset] | None' = None,
             )
+            # --- ASSET --- #
+            level_2_asset = pystac.Asset(
+                # href="https://noaa-wcsd-zarr-pds.s3.amazonaws.com/level_2a/Henry_B._Bigelow/HB1906/EK60/HB1906.zarr/",
+                href="s3://noaa-wcsd-zarr-pds/level_2a/Henry_B._Bigelow/HB1906/EK60/HB1906.zarr/",
+                title="HB1906 EK60 Zarr Store",
+                description="Zarr store of the HB1906 EK60 data consolidated for the whole cruise",
+                media_type=pystac.MediaType.ZARR,
+                roles=["data", "zarr"],
+                # extra_fields: dict[str, Any] | None = None,
+            )
+            level_2_item.add_asset(key="EK60", asset=level_2_asset)
+            #
+            #
             level_2_collection.add_item(level_2_item)
             level_2_catalog.add_child(level_2_collection)
             level_2_catalog.describe()
             #
-            # TODO: need to add assets to each item
-            # --- ASSETS --- #
+            # --- ASSET --- #
             # level_2_asset_thumbnail = pystac.Asset(
             #     href="https://www.ncei.noaa.gov/sites/default/files/2022-03/AllBeamCurtains_griddedMultibeam-102-file-good-bathy442x185.jpg",
             #     media_type=pystac.MediaType.JPEG
@@ -181,8 +195,16 @@ class CatalogManager:
             #     extra_fields=None,
             # )
             #
-            print(level_2_collection.describe())
-            return level_2_catalog
+            # print(level_2_collection.describe())
+            # print(new_catalog)
+            # print(new_catalog.get_self_href())
+            level_2_catalog.normalize_hrefs(os.path.join(tmp_dir.name, "stac"))
+            # print(new_catalog.get_self_href())
+            level_2_catalog.save(
+                catalog_type=pystac.CatalogType.RELATIVE_PUBLISHED
+            )  # .SELF_CONTAINED)
+            print(f"saved to: {tmp_dir.name}/stac/")
+            return (level_2_catalog, f"saved to: {tmp_dir.name}/stac/")
         except Exception as error:
             raise Exception(f"Problem creating catalog: {error}")
 
@@ -190,22 +212,30 @@ class CatalogManager:
 ### TODO: follow zarr guide here: https://element84.com/software-engineering/zarr-stac/
 if __name__ == "__main__":
     catalog_manager = CatalogManager()
-    new_catalog = catalog_manager.create_level_2_catalog()
+    new_catalog, loc = catalog_manager.create_level_2_catalog()
     new_catalog.describe()
-    print(new_catalog)
-    print(new_catalog.get_self_href())
-    new_catalog.normalize_hrefs(os.path.join(tmp_dir.name, "stac"))
-    print(new_catalog.get_self_href())
-    new_catalog.save(catalog_type=pystac.CatalogType.SELF_CONTAINED)
-    print(f"{tmp_dir.name}/stac/")
-    # new_catalog.save(
-    #     catalog_type=pystac.CatalogType.ABSOLUTE_PUBLISHED,
-    #     # dest_href=?
+    ### https://github.com/stac-utils/xpystac ###
+    # item = pystac.Item.from_file(f"{loc}")
+    # asset = item.assets["visual"]
+    # xr.open_dataset(asset)
+    # list(new_catalog.get_items(recursive=True))
+    # collection = new_catalog.get_collections()  # "HB1906"
+    # asset = collection.assets["ZARR"]  # need way to distinguish??? EK60 vs ME70
+    asset = list(new_catalog.get_items(recursive=True))[0].assets["EK60"]
+    kwargs = {"consolidated": False}
+    ds = xr.open_dataset(filename_or_obj=asset, engine="zarr", **kwargs)
+    print(ds)
+    #
+    # catalog = pystac_client.Client.open(
+    #     "https://earth-search.aws.element84.com/v1",
     # )
-    # .normalize_and_save(
-    #     root_href=os.path.join(tmp_dir.name, 'stac-collection'),
-    #     catalog_type=pystac.CatalogType.ABSOLUTE_PUBLISHED, # or SELF_CONTAINED?
+    # search = catalog.search(
+    #     intersects=dict(type="Point", coordinates=[-105.78, 35.79]),
+    #     collections=["sentinel-2-l2a"],
+    #     datetime="2022-04-01/2022-05-01",
     # )
+    # xr.open_dataset(search, engine="stac")
+    #
     print("done")
 
 """
@@ -232,6 +262,7 @@ https://noaa-wcsd-pds.s3.amazonaws.com/index.html#data/raw/Henry_B._Bigelow/HB19
       * <Item id=D20070711-T182032.raw>
       ...
     ...
+
 ### file level zarr stores ###
 * <Catalog id=water-column-sonar-level-1>
     * <Collection id=HB1906>
@@ -241,11 +272,13 @@ https://noaa-wcsd-pds.s3.amazonaws.com/index.html#data/raw/Henry_B._Bigelow/HB19
       * <Item id=D20190903-T175930.nc>
       * <Item id=D20190903-T183959.zarr>
       * <Item id=D20190903-T183959.nc>
+
 ### cruise level zarr store ###
 * <Catalog id=water-column-sonar-level-2>
     * <Collection id=HB1906>
-      * <Item id=HB1906.zarr> <-- this should be 'HB1906_EK60.zarr'
+      * <Item id=HB1906.zarr ek60> <-- this should be 'HB1906_EK60.zarr'
       * <Item id=HB1906_int8.zarr>
+      * <Item id=HB1906.zarr ek80> 
 
 
 Catalog(id: 'str', description: 'str', title: 'str | None' = None, stac_extensions: 'list[str] | None' = None, extra_fields: 'dict[str, Any] | None' = None, href: 'str | None' = None, catalog_type: 'CatalogType' = 'ABSOLUTE_PUBLISHED', strategy: 'HrefLayoutStrategy | None' = None)
