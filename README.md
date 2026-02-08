@@ -1,8 +1,15 @@
 # Water Column Sonar Catalog
+
 🌊 STAC Catalog for Water Column Sonar Data ⭐
 
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/CI-CMG/water-column-sonar-catalog/test_action.yaml)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/CI-CMG/water-column-sonar-catalog) ![GitHub repo size](https://img.shields.io/github/repo-size/CI-CMG/water-column-sonar-catalog)
+
+# Browser
+
+Copy url of stac catalog and
+goto: https://radiantearth.github.io/stac-browser/#/?.language=en
+or: https://radiantearth.github.io/stac-browser/#/external/raw.githubusercontent.com/CI-CMG/water-column-sonar-catalog/refs/heads/main/level_2_stac_catalog/HB1906/collection.json
 
 # Ecosystem
 
@@ -77,6 +84,7 @@ uv run pre-commit install
 Step 1: Increment the semantic version in the zarr_manager.py "metadata" & the "pyproject.toml"
 
 Step 2:
+
 ```commandline
 git tag -a v26.1.17 -m "Releasing v26.1.17"
 git push origin --tags
@@ -106,4 +114,3 @@ uv lock
 uv sync --all-groups
 uv run pytest --cache-clear tests
 ```
-
