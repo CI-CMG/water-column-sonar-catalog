@@ -5,26 +5,29 @@ class CruiseManager:
     #######################################################
     def __init__(
         self,
+        bucket_name: str,
+        level: str,
+        ship_name: str,
+        cruise_name: str,
+        instrument_name: str,
     ):
-        self.__overwrite = True
+        self.bucket_name = bucket_name
+        self.level = level
+        self.ship_name = ship_name
+        self.cruise_name = cruise_name
+        self.instrument_name = instrument_name
 
-    @staticmethod
-    def get_cruise():
+    def get_cruise(self):
         try:
-            bucket_name = "noaa-wcsd-zarr-pds"
-            level = "level_2a"
-            ship_name = "Henry_B._Bigelow"
-            cruise_name = "HB1906"
-            instrument_name = "EK60"
-            zarr_store = f"{cruise_name}.zarr"
-            s3_zarr_store_path = f"{bucket_name}/{level}/{ship_name}/{cruise_name}/{instrument_name}/{zarr_store}"
+            zarr_store = f"{self.cruise_name}.zarr"
+            s3_zarr_store_path = f"{self.bucket_name}/{self.level}/{self.ship_name}/{self.cruise_name}/{self.instrument_name}/{zarr_store}"
+
             kwargs = {"consolidated": False}
-            # foo = xr.open_dataset(filename_or_obj=asset, **kwargs)
-            # print(foo)
             return xr.open_dataset(
                 filename_or_obj=f"s3://{s3_zarr_store_path}",
                 engine="zarr",
                 storage_options={"anon": True},
+                cache=True,
                 **kwargs,
             )
         except Exception as error:

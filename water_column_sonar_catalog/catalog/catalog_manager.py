@@ -1,4 +1,3 @@
-import os
 from tempfile import TemporaryDirectory
 
 import pandas as pd
@@ -7,8 +6,6 @@ import xarray as xr
 
 from water_column_sonar_catalog.cruise import CruiseManager
 from water_column_sonar_catalog.geospatial import GeospatialManager
-
-# from shapely.geometry import MultiPolygon, shape
 
 """
 Creating metadata catalog:
@@ -28,107 +25,103 @@ tmp_dir = TemporaryDirectory()
 class CatalogManager:
     def __init__(
         self,
+        bucket_name: str = "noaa-wcsd-zarr-pds",
+        level: str = "level_2a",
         ship_name: str = "Henry_B._Bigelow",
         cruise_name: str = "HB1906",
         instrument_name: str = "EK60",
     ):
+        self.bucket_name = bucket_name
+        self.level = level
         self.ship_name = ship_name
         self.cruise_name = cruise_name
         self.instrument_name = instrument_name
-        self.provider_national_centers_for_environmental_information = pystac.Provider(
+        self.catalog_type = pystac.CatalogType.RELATIVE_PUBLISHED
+        self.provider_ncei = pystac.Provider(
             name="NOAA National Centers for Environmental Information",
             description="In collaboration with NOAA's National Marine Fisheries Service (NMFS) and the University of Colorado Boulder, NOAA’s National Centers for Environmental Information (NCEI) established a national archive for water column sonar data. This project entails ensuring the long-term stewardship of well-documented water column sonar data, and enabling discovery and access to researchers and the public around the world.",
-            roles=[pystac.ProviderRole.HOST, pystac.ProviderRole.LICENSOR],
+            roles=[pystac.ProviderRole.HOST],
             url="https://www.ncei.noaa.gov/",
-            # extra_fields: dict[str, Any] | None = None,
         )
-        self.provider_marine_geology_and_geophysics = pystac.Provider(
-            name="NCEI Marine Geology and Geophysics",
-            description="The NOAA National Centers for Environmental Information (NCEI) are part of the US Department of Commerce, National Oceanic and Atmospheric Administration (NOAA), National Environmental Satellite, Data, and Information Service (NESDIS).",
-            roles=[pystac.ProviderRole.PRODUCER],
-            url="https://www.ngdc.noaa.gov/mgg/aboutmgg/aboutmgg.html",
-            # extra_fields: dict[str, Any] | None = None,
-        )
-        self.provider_cooperative_institute_for_research_in_environmental_sciences = pystac.Provider(
-            name="CU Cooperative Institute for Research In Environmental Sciences",
-            description="At CIRES, the Cooperative Institute for Research In Environmental Sciences, hundreds of scientists work to understand the dynamic Earth system, including people’s relationship with the planet",
+        self.provider_cires = pystac.Provider(
+            name="Cooperative Institute for Research In Environmental Sciences",
+            description="At CIRES, the Cooperative Institute for Research In Environmental Sciences, hundreds of scientists work to understand the dynamic Earth system, including people’s relationship with the planet.",
             roles=[pystac.ProviderRole.PROCESSOR],
             url="https://cires.colorado.edu/",
-            # extra_fields: dict[str, Any] | None = None,
+        )
+        self.provider_henry_bigelow = pystac.Provider(
+            name="Henry_B._Bigelow",
+            description="Henry B. Bigelow conducts both acoustic and trawl surveys.",
+            roles=[pystac.ProviderRole.PRODUCER],
+            url="https://www.omao.noaa.gov/marine-operations/ships/henry-b-bigelow",
         )
 
     def create_level_2_catalog(self):
-        """Cruise Level Zarr store Catalog"""
+        """Cruise Level 2 Zarr store Catalog"""
         try:
-            ### Read in HB1906 cruise ###
-            cruise_manager = CruiseManager()
+            ### Read in cruise zarr store ###
+            cruise_manager = CruiseManager(
+                bucket_name=self.bucket_name,
+                level=self.level,
+                ship_name=self.ship_name,
+                cruise_name=self.cruise_name,
+                instrument_name=self.instrument_name,
+            )
             cruise = cruise_manager.get_cruise()
 
-            # --- CATALOG --- #
+            ################################ --- CATALOG --- ################################
             level_2_catalog = pystac.Catalog(
-                id="water-column-sonar-level-2",
-                description="Level 2 water column sonar data from the NOAA National Centers for Environmental Information",
-                title="Water Column Sonar Level 2 Zarr Stores",
-                # stac_extensions: 'list[str] | None' = None
-                extra_fields=dict(
-                    url="https://www.ncei.noaa.gov/products/water-column-sonar-data",
-                ),
-                # href="https://noaa-wcsd-zarr-pds.s3.amazonaws.com/index.html#level_2a/",
-                # catalog_type=pystac.CatalogType.ABSOLUTE_PUBLISHED,
-                # strategy: 'HrefLayoutStrategy | None' = None),
+                id=f"water-column-sonar-{self.level}",
+                description="Level 2 Water Column Sonar Data from the NOAA National Centers for Environmental Information",
+                title=f"Water Column Sonar {self.level} Zarr Stores",
+                href="https://www.ncei.noaa.gov/products/water-column-sonar-data",
+                catalog_type=self.catalog_type,
             )
-            # print(list(level_2_catalog.get_children()))  # no children yet
-            # print(list(level_2_catalog.get_items()))  # none yet
 
-            # --- COLLECTION --- #
-            ### bbox ###
-            geospatial_manager = GeospatialManager()
+            ### bounding box ###
+            geospatial_manager = GeospatialManager(
+                bucket_name=self.bucket_name,
+                level=self.level,
+                ship_name=self.ship_name,
+                cruise_name=self.cruise_name,
+                instrument_name=self.instrument_name,
+            )
             bbox, footprint, geojson = geospatial_manager.get_bounding_box()
 
-            #### dates ###
+            ### date range ###
             start_datetime = pd.Timestamp(cruise.time.values[0])
             end_datetime = pd.Timestamp(cruise.time.values[-1])
             temporal_extent = pystac.TemporalExtent(
                 intervals=[[start_datetime, end_datetime]]
             )
-            #### extent
+            ### extent ###
             spatial_extent = pystac.SpatialExtent(bboxes=[bbox])
             extent = pystac.Extent(spatial=spatial_extent, temporal=temporal_extent)
 
+            ################################ --- COLLECTION --- ################################
             level_2_collection = pystac.Collection(
-                id="HB1906",  # cruise name
-                description="Level 2 water column sonar data from the Henry_B._Bigelow HB1906 cruise",
+                id=self.cruise_name,
+                description=f"Level 2 water column sonar data from the {self.ship_name} {self.cruise_name} cruise.",
                 extent=extent,
-                title="Henry_B._Bigelow HB1906 Zarr Stores",
-                # stac_extensions: 'list[str] | None' = None,
-                href="https://noaa-wcsd-zarr-pds.s3.amazonaws.com/index.html#level_2a/",
-                catalog_type=pystac.CatalogType.ABSOLUTE_PUBLISHED,
-                # license: 'str' = 'other',
-                keywords=[
-                    "ocean",
-                    "oceanography",
-                    "marine",
-                    "water column",
-                    "sonar",
-                    "fish",
-                ],
-                providers=[
-                    self.provider_cooperative_institute_for_research_in_environmental_sciences,
-                    self.provider_marine_geology_and_geophysics,
-                    self.provider_national_centers_for_environmental_information,
-                ],
-                # summaries: 'Summaries | None' = None, # An optional map of property summaries, either a set of values or statistics such as a range.
-                # TODO: for assets, would include XML, metadata
-                # assets: 'dict[str, Asset] | None' = None,
-                # strategy: 'HrefLayoutStrategy | None' = None,
+                title=f"{self.ship_name} {self.cruise_name} Zarr Stores",
+                href=f"https://{self.bucket_name}.s3.amazonaws.com/index.html#{self.level}/",
+                catalog_type=self.catalog_type,
+                keywords=["oceanography"],
+                providers=[self.provider_henry_bigelow, self.provider_ncei],
             )
-            # level_2_catalog.add_child(level_2_collection)
-            # print(list(level_2_catalog.get_children()))  # no children yet
-            # print(list(level_2_catalog.get_items()))  # none yet
 
-            # --- ITEM --- #
+            ################################ --- ASSET --- ################################
+            level_2_asset = pystac.Asset(
+                href=f"s3://{self.bucket_name}/{self.level}/{self.ship_name}/{self.cruise_name}/{self.instrument_name}/{self.cruise_name}.zarr",
+                title=f"{self.level} {self.ship_name} {self.cruise_name} {self.instrument_name} Zarr Store",
+                description="Consolidated cruise-level Zarr store",
+                media_type=pystac.MediaType.ZARR,
+                roles=["latest-version"],
+            )
+
+            ################################ --- ITEM --- ################################
             level_2_item = pystac.Item(
-                id=f"{self.instrument_name}",  # EK60.zarr vs ME70.zarr
+                id=f"{self.instrument_name}",
                 geometry=geojson,
                 bbox=bbox,
                 datetime=None,
@@ -136,95 +129,48 @@ class CatalogManager:
                     ship_name=self.ship_name,
                     cruise_name=self.cruise_name,
                     instrument_name=self.instrument_name,
-                    #
-                    processing_software_name="echofish",
-                    processing_software_version="26.1.14",
-                    processing_software_time="2026-01-20T09:39:09.116Z",
+                    level=self.level,
                     calibration_status=True,
-                    doi="http://doi.org/10.25921/vt45-sa66",
                 ),
                 start_datetime=start_datetime,
                 end_datetime=end_datetime,
-                # stac_extensions: 'list[str] | None' = None,
-                ### TODO: should this be a navigable url or zarr store url? ###
-                href="https://noaa-wcsd-zarr-pds.s3.amazonaws.com/level_2a/Henry_B._Bigelow/HB1906/EK60/HB1906.zarr/",
+                href=f"https://{self.bucket_name}.s3.amazonaws.com/{self.level}/{self.ship_name}/{self.cruise_name}/{self.instrument_name}/{self.cruise_name}.zarr/",
                 collection=level_2_collection,
-                # extra_fields: 'dict[str, Any] | None' = None,
-                # assets: 'dict[str, Asset] | None' = None,
+                assets=dict(zarr=level_2_asset),
             )
-            # --- ASSET --- #
-            level_2_asset = pystac.Asset(
-                # href="https://noaa-wcsd-zarr-pds.s3.amazonaws.com/level_2a/Henry_B._Bigelow/HB1906/EK60/HB1906.zarr/",
-                href="s3://noaa-wcsd-zarr-pds/level_2a/Henry_B._Bigelow/HB1906/EK60/HB1906.zarr/",
-                title="HB1906 EK60 Zarr Store",
-                description="Zarr store of the HB1906 EK60 data consolidated for the whole cruise",
-                media_type=pystac.MediaType.ZARR,
-                roles=["data", "zarr"],
-                # extra_fields: dict[str, Any] | None = None,
-            )
-            level_2_item.add_asset(key="EK60", asset=level_2_asset)
             #
-            #
+            ################################ --- ATTACH --- ################################
             level_2_collection.add_item(level_2_item)
             level_2_catalog.add_child(level_2_collection)
-            level_2_catalog.describe()
             #
-            # --- ASSET --- #
-            # level_2_asset_thumbnail = pystac.Asset(
-            #     href="https://www.ncei.noaa.gov/sites/default/files/2022-03/AllBeamCurtains_griddedMultibeam-102-file-good-bathy442x185.jpg",
-            #     media_type=pystac.MediaType.JPEG
-            # )
-            # level_2_item.add_asset(
-            #     key="image",
-            #     asset=level_2_asset_thumbnail,
-            # )
-            # level_2_item.add_link(
-            #     pystac.Link(
-            #         rel="s3://noaa-wcsd-zarr-pds/level_2a/Henry_B._Bigelow/HB1906/EK60/HB1906.zarr",
-            #         media_type=pystac.MediaType.ZARR,
-            #         title="asf",
-            #         target="",
-            #     )
-            # )
-            # asset = pystac.Asset(
-            #     href="https://noaa-wcsd-zarr-pds.s3.us-east-1.amazonaws.com/L2A/Henry_B._Bigelow/HB1906/EK60/D20190903-T171901.zarr",
-            #     title="HB1906",
-            #     description="",
-            #     media_type=pystac.MediaType.ZARR,
-            #     roles=["data"],
-            #     extra_fields=None,
-            # )
-            #
-            # print(level_2_collection.describe())
-            # print(new_catalog)
-            # print(new_catalog.get_self_href())
-            level_2_catalog.normalize_hrefs(os.path.join(tmp_dir.name, "stac"))
-            # print(new_catalog.get_self_href())
-            level_2_catalog.save(
-                catalog_type=pystac.CatalogType.RELATIVE_PUBLISHED
-            )  # .SELF_CONTAINED)
-            print(f"saved to: {tmp_dir.name}/stac/")
-            return (level_2_catalog, f"saved to: {tmp_dir.name}/stac/")
+            # level_2_catalog.normalize_hrefs(os.path.join(tmp_dir.name, "stac"))
+            level_2_catalog.normalize_hrefs("../stac_catalog")
+            level_2_catalog.save(catalog_type=pystac.CatalogType.RELATIVE_PUBLISHED)
+            return level_2_catalog
         except Exception as error:
             raise Exception(f"Problem creating catalog: {error}")
 
 
 ### TODO: follow zarr guide here: https://element84.com/software-engineering/zarr-stac/
 if __name__ == "__main__":
-    catalog_manager = CatalogManager()
-    new_catalog, loc = catalog_manager.create_level_2_catalog()
+    catalog_manager = CatalogManager(
+        bucket_name="noaa-wcsd-zarr-pds",
+        level="level_2a",
+        ship_name="Henry_B._Bigelow",
+        cruise_name="HB1906",
+        instrument_name="EK60",
+    )
+    new_collection, new_catalog = catalog_manager.create_level_2_catalog()
     new_catalog.describe()
-    ### https://github.com/stac-utils/xpystac ###
-    # item = pystac.Item.from_file(f"{loc}")
-    # asset = item.assets["visual"]
-    # xr.open_dataset(asset)
-    # list(new_catalog.get_items(recursive=True))
-    # collection = new_catalog.get_collections()  # "HB1906"
-    # asset = collection.assets["ZARR"]  # need way to distinguish??? EK60 vs ME70
-    asset = list(new_catalog.get_items(recursive=True))[0].assets["EK60"]
+    #
+    asset = list(new_catalog.get_items(recursive=True))[0].assets["zarr"]
     kwargs = {"consolidated": False}
-    ds = xr.open_dataset(filename_or_obj=asset, engine="zarr", **kwargs)
-    print(ds)
+    ds = xr.open_dataset(filename_or_obj=asset.href, engine="zarr", **kwargs)
+    print(ds.Sv.shape)
+    #
+    print(  # This gets the latest zarr store for an item
+        list(new_catalog.get_items(recursive=True))[0].get_assets(role="latest-version")
+    )
     #
     # catalog = pystac_client.Client.open(
     #     "https://earth-search.aws.element84.com/v1",

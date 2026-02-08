@@ -1,7 +1,5 @@
 import geopandas as gpd
 import numpy as np
-
-# from get_cruise import GetCruise
 from shapely.geometry import LineString, Polygon, mapping
 
 from water_column_sonar_catalog.cruise import CruiseManager
@@ -14,33 +12,36 @@ Getting the bounding box for an individual cruise for stac catalog.
 class GeospatialManager:
     def __init__(
         self,
+        bucket_name,
+        level,
+        ship_name,
+        cruise_name,
+        instrument_name,
     ):
-        self.__overwrite = True
         self.simplification_tolerance = 0.1
+        self.bucket_name = bucket_name
+        self.level = level
+        self.ship_name = ship_name
+        self.cruise_name = cruise_name
+        self.instrument_name = instrument_name
 
     def get_bounding_box(self):
         try:
-            # bucket_name = "noaa-wcsd-zarr-pds"
-            # ship_name = "Henry_B._Bigelow"
-            # cruise_name = "HB1906"
-            # sensor_name = "EK60"
-            # zarr_store = f"{cruise_name}.zarr"
-            # s3_zarr_store_path = f"{bucket_name}/level_2/{ship_name}/{cruise_name}/{sensor_name}/{zarr_store}"
-            # cruise = xr.open_dataset(
-            #     filename_or_obj=f"s3://{s3_zarr_store_path}",
-            #     engine="zarr",
-            #     storage_options={"anon": True},
-            #     chunks={},
-            # )
-            get_cruise = CruiseManager()
+            get_cruise = CruiseManager(
+                bucket_name=self.bucket_name,
+                level=self.level,
+                ship_name=self.ship_name,
+                cruise_name=self.cruise_name,
+                instrument_name=self.instrument_name,
+            )
             cruise = get_cruise.get_cruise()
 
             latitude = cruise.latitude.to_numpy()
-            longitude = cruise.longitude.to_numpy()  # TODO: assert non null
+            longitude = cruise.longitude.to_numpy()
             if np.isnan(latitude).any() or np.isnan(longitude).any():
                 raise RuntimeError("There was missing lat-lon dataset")
             geom = LineString(list(zip(longitude, latitude)))
-            print(len(geom.coords))
+            # print(len(geom.coords))
             gdf = gpd.GeoDataFrame({"geometry": [geom]}, crs="EPSG:4326")
             bounds = gdf.bounds
             footprint = Polygon(
