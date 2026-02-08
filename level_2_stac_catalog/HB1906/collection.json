@@ -95,5 +95,16 @@
       ],
       "url": "https://www.omao.noaa.gov/marine-operations/ships/henry-b-bigelow"
     }
-  ]
+  ],
+  "assets": {
+    "thumbnail": {
+      "href": "https://noaa-wcsd-pds-index.s3.us-east-1.amazonaws.com/stac-catalog/HB1906_thumbnail.jpg",
+      "type": "image/jpeg",
+      "title": "HB1906 EK60",
+      "description": "HB1906 thumbnail.",
+      "roles": [
+        "thumbnail"
+      ]
+    }
+  }
 }

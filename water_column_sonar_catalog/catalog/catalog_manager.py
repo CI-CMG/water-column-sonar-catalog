@@ -149,13 +149,6 @@ class CatalogManager:
                 media_type=pystac.MediaType.ZARR,
                 roles=["latest-version"],
             )
-            level_2_asset_thumbnail = pystac.Asset(
-                href="https://noaa-wcsd-pds-index.s3.us-east-1.amazonaws.com/stac-catalog/HB1906_thumbnail.jpg",
-                title=f"{self.cruise_name} {self.instrument_name}",
-                description=f"{self.cruise_name} thumbnail.",
-                media_type=pystac.MediaType.JPEG,
-                roles=["thumbnail"],
-            )
 
             ################################ --- ITEM --- ################################
             level_2_item = pystac.Item(
@@ -174,13 +167,23 @@ class CatalogManager:
                 end_datetime=end_datetime,
                 href=f"https://{self.bucket_name}.s3.amazonaws.com/{self.level}/{self.ship_name}/{self.cruise_name}/{self.instrument_name}/{self.cruise_name}.zarr/",
                 collection=level_2_collection,
-                assets=dict(zarr=level_2_asset_zarr, thumbnail=level_2_asset_thumbnail),
+                assets=dict(zarr=level_2_asset_zarr),
             )
             level_2_item.common_metadata.instruments = ["EK60"]
             level_2_item.common_metadata.providers = [
                 Providers.provider_henry_bigelow.value
             ]
             level_2_item.common_metadata.updated = datetime.datetime.now()
+
+            ### thumbnail ###
+            level_2_asset_thumbnail = pystac.Asset(
+                href="https://noaa-wcsd-pds-index.s3.us-east-1.amazonaws.com/stac-catalog/HB1906_thumbnail.jpg",
+                title=f"{self.cruise_name} {self.instrument_name}",
+                description=f"{self.cruise_name} thumbnail.",
+                media_type=pystac.MediaType.JPEG,
+                roles=["thumbnail"],
+            )
+            level_2_collection.add_asset(key="thumbnail", asset=level_2_asset_thumbnail)
             #
             ################################ --- ATTACH --- ################################
             level_2_collection.add_item(level_2_item)
