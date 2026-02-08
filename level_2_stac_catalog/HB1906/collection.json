@@ -1,0 +1,68 @@
+{
+  "type": "Collection",
+  "id": "HB1906",
+  "stac_version": "1.1.0",
+  "description": "Level 2 water column sonar data from the Henry_B._Bigelow HB1906 cruise.",
+  "links": [
+    {
+      "rel": "root",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "Water Column Sonar level_2a Zarr Stores"
+    },
+    {
+      "rel": "item",
+      "href": "./EK60/EK60.json",
+      "type": "application/geo+json"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "Water Column Sonar level_2a Zarr Stores"
+    }
+  ],
+  "title": "Henry_B._Bigelow HB1906 Zarr Stores",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -75.88610076904297,
+          34.613189697265625,
+          -65.72959899902344,
+          44.36823654174805
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2019-09-03T17:19:01.176990976Z",
+          "2019-11-14T13:02:42.904948992Z"
+        ]
+      ]
+    }
+  },
+  "license": "other",
+  "keywords": [
+    "oceanography"
+  ],
+  "providers": [
+    {
+      "name": "Henry_B._Bigelow",
+      "description": "Henry B. Bigelow conducts both acoustic and trawl surveys.",
+      "roles": [
+        "producer"
+      ],
+      "url": "https://www.omao.noaa.gov/marine-operations/ships/henry-b-bigelow"
+    },
+    {
+      "name": "NOAA National Centers for Environmental Information",
+      "description": "In collaboration with NOAA's National Marine Fisheries Service (NMFS) and the University of Colorado Boulder, NOAA\u2019s National Centers for Environmental Information (NCEI) established a national archive for water column sonar data. This project entails ensuring the long-term stewardship of well-documented water column sonar data, and enabling discovery and access to researchers and the public around the world.",
+      "roles": [
+        "host"
+      ],
+      "url": "https://www.ncei.noaa.gov/"
+    }
+  ]
+}

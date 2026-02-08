@@ -18,7 +18,7 @@ class GeospatialManager:
         cruise_name,
         instrument_name,
     ):
-        self.simplification_tolerance = 0.1
+        self.simplification_tolerance = 0.01
         self.bucket_name = bucket_name
         self.level = level
         self.ship_name = ship_name
@@ -63,8 +63,9 @@ class GeospatialManager:
             ]
             ### simplify geometry
             geom_simplified = LineString(list(zip(longitude, latitude))).simplify(
-                tolerance=self.simplification_tolerance,  # preserve_topology=True # 113
-            )
+                tolerance=self.simplification_tolerance,
+                preserve_topology=False,  # 113
+            )  # 1=36k,
             gdf_simplified = gpd.GeoDataFrame(
                 {"geometry": [geom_simplified]}, crs="EPSG:4326"
             )

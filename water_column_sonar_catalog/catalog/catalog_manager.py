@@ -1,3 +1,4 @@
+import datetime
 from tempfile import TemporaryDirectory
 
 import pandas as pd
@@ -124,13 +125,13 @@ class CatalogManager:
                 id=f"{self.instrument_name}",
                 geometry=geojson,
                 bbox=bbox,
-                datetime=None,
+                datetime=start_datetime,
                 properties=dict(
                     ship_name=self.ship_name,
                     cruise_name=self.cruise_name,
                     instrument_name=self.instrument_name,
                     level=self.level,
-                    calibration_status=True,
+                    calibrated=True,
                 ),
                 start_datetime=start_datetime,
                 end_datetime=end_datetime,
@@ -138,14 +139,18 @@ class CatalogManager:
                 collection=level_2_collection,
                 assets=dict(zarr=level_2_asset),
             )
+            level_2_item.common_metadata.instruments = ["EK60"]
+            level_2_item.common_metadata.providers = [self.provider_henry_bigelow]
+            level_2_item.common_metadata.updated = datetime.datetime.now()
             #
             ################################ --- ATTACH --- ################################
             level_2_collection.add_item(level_2_item)
             level_2_catalog.add_child(level_2_collection)
             #
             # level_2_catalog.normalize_hrefs(os.path.join(tmp_dir.name, "stac"))
-            level_2_catalog.normalize_hrefs("../stac_catalog")
-            level_2_catalog.save(catalog_type=pystac.CatalogType.RELATIVE_PUBLISHED)
+            level_2_catalog.normalize_hrefs("../../level_2_stac_catalog")
+            level_2_catalog.save(catalog_type=pystac.CatalogType.SELF_CONTAINED)
+            # .RELATIVE_PUBLISHED)
             return level_2_catalog
         except Exception as error:
             raise Exception(f"Problem creating catalog: {error}")
@@ -160,7 +165,7 @@ if __name__ == "__main__":
         cruise_name="HB1906",
         instrument_name="EK60",
     )
-    new_collection, new_catalog = catalog_manager.create_level_2_catalog()
+    new_catalog = catalog_manager.create_level_2_catalog()
     new_catalog.describe()
     #
     asset = list(new_catalog.get_items(recursive=True))[0].assets["zarr"]
