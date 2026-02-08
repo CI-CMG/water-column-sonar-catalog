@@ -2,13 +2,13 @@
   "type": "Catalog",
   "id": "water-column-sonar-level_2a",
   "stac_version": "1.1.0",
-  "description": "Level 2 Water Column Sonar Data from the NOAA National Centers for Environmental Information",
+  "description": "Level 2 Water Column Sonar Data from the NOAA's National Centers for Environmental Information",
   "links": [
     {
       "rel": "root",
       "href": "./catalog.json",
       "type": "application/json",
-      "title": "Water Column Sonar level_2a Zarr Stores"
+      "title": "Water Column Sonar Level 2 Data"
     },
     {
       "rel": "child",
@@ -17,5 +17,5 @@
       "title": "Henry_B._Bigelow HB1906 Zarr Stores"
     }
   ],
-  "title": "Water Column Sonar level_2a Zarr Stores"
+  "title": "Water Column Sonar Level 2 Data"
 }

@@ -31,15 +31,15 @@
         "url": "https://www.omao.noaa.gov/marine-operations/ships/henry-b-bigelow"
       }
     ],
-    "updated": "2026-02-08T11:48:15.559178Z",
-    "datetime": "2019-09-03T17:19:01.176990976Z"
+    "updated": "2026-02-08T14:17:04.651585Z",
+    "datetime": null
   },
   "links": [
     {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
-      "title": "Water Column Sonar level_2a Zarr Stores"
+      "title": "Water Column Sonar Level 2 Data"
     },
     {
       "rel": "collection",
@@ -62,6 +62,15 @@
       "description": "Consolidated cruise-level Zarr store",
       "roles": [
         "latest-version"
+      ]
+    },
+    "thumbnail": {
+      "href": "https://noaa-wcsd-pds-index.s3.us-east-1.amazonaws.com/stac-catalog/HB1906_thumbnail.jpg",
+      "type": "image/jpeg",
+      "title": "HB1906 EK60",
+      "description": "HB1906 thumbnail.",
+      "roles": [
+        "thumbnail"
       ]
     }
   },

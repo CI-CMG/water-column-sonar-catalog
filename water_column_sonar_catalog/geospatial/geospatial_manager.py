@@ -1,8 +1,7 @@
 import geopandas as gpd
 import numpy as np
+from cruise.cruise_manager import CruiseManager
 from shapely.geometry import LineString, Polygon, mapping
-
-from water_column_sonar_catalog.cruise import CruiseManager
 
 """
 Getting the bounding box for an individual cruise for stac catalog. 

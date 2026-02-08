@@ -8,7 +8,7 @@
       "rel": "root",
       "href": "../catalog.json",
       "type": "application/json",
-      "title": "Water Column Sonar level_2a Zarr Stores"
+      "title": "Water Column Sonar Level 2 Data"
     },
     {
       "rel": "item",
@@ -19,7 +19,7 @@
       "rel": "parent",
       "href": "../catalog.json",
       "type": "application/json",
-      "title": "Water Column Sonar level_2a Zarr Stores"
+      "title": "Water Column Sonar Level 2 Data"
     }
   ],
   "title": "Henry_B._Bigelow HB1906 Zarr Stores",
@@ -43,11 +43,50 @@
       ]
     }
   },
-  "license": "other",
+  "license": "MIT",
   "keywords": [
-    "oceanography"
+    "ocean",
+    "oceanography",
+    "water column",
+    "sonar",
+    "fish",
+    "ai",
+    "machine learning",
+    "zarr"
   ],
   "providers": [
+    {
+      "name": "National Oceanic and Atmospheric Administration",
+      "description": "The National Oceanic and Atmospheric Administration is a United States scientific and regulatory agency tasked with forecasting weather, monitoring oceanic and atmospheric conditions, charting the seas, conducting deep-sea exploration, and managing fishing and protection of marine mammals and endangered species in the US exclusive economic zone.",
+      "roles": [
+        "host"
+      ],
+      "url": "https://www.ncei.noaa.gov/"
+    },
+    {
+      "name": "National Centers for Environmental Information",
+      "description": "In collaboration with NOAA's National Marine Fisheries Service (NMFS) and the University of Colorado Boulder, NOAA\u2019s National Centers for Environmental Information (NCEI) established a national archive for water column sonar data. This project entails ensuring the long-term stewardship of well-documented water column sonar data, and enabling discovery and access to researchers and the public around the world.",
+      "roles": [
+        "host"
+      ],
+      "url": "https://www.ncei.noaa.gov/"
+    },
+    {
+      "name": "Marine Geology and Geophysics",
+      "description": "The NOAA National Centers for Environmental Information (NCEI) are part of the US Department of Commerce, National Oceanic and Atmospheric Administration (NOAA), National Environmental Satellite, Data, and Information Service (NESDIS).",
+      "roles": [
+        "processor"
+      ],
+      "url": "https://www.ngdc.noaa.gov/mgg/aboutmgg/aboutmgg.html"
+    },
+    {
+      "name": "Cooperative Institute for Research In Environmental Sciences",
+      "description": "At CIRES, the Cooperative Institute for Research In Environmental Sciences, hundreds of scientists work to understand the dynamic Earth system, including people\u2019s relationship with the planet.",
+      "roles": [
+        "processor"
+      ],
+      "url": "https://cires.colorado.edu/"
+    },
     {
       "name": "Henry_B._Bigelow",
       "description": "Henry B. Bigelow conducts both acoustic and trawl surveys.",
@@ -55,14 +94,6 @@
         "producer"
       ],
       "url": "https://www.omao.noaa.gov/marine-operations/ships/henry-b-bigelow"
-    },
-    {
-      "name": "NOAA National Centers for Environmental Information",
-      "description": "In collaboration with NOAA's National Marine Fisheries Service (NMFS) and the University of Colorado Boulder, NOAA\u2019s National Centers for Environmental Information (NCEI) established a national archive for water column sonar data. This project entails ensuring the long-term stewardship of well-documented water column sonar data, and enabling discovery and access to researchers and the public around the world.",
-      "roles": [
-        "host"
-      ],
-      "url": "https://www.ncei.noaa.gov/"
     }
   ]
 }
