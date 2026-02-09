@@ -114,3 +114,9 @@ uv lock
 uv sync --all-groups
 uv run pytest --cache-clear tests
 ```
+
+# Slack
+
+```
+/github subscribe CI-CMG/water-column-sonar-catalog issues pulls commits releases deployments reviews branches comments discussions workflows:{event: "push"}
+```

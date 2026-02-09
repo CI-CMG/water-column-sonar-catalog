@@ -1,7 +1,8 @@
 import geopandas as gpd
 import numpy as np
+import shapely  # import set_precision
 from cruise.cruise_manager import CruiseManager
-from shapely.geometry import LineString, Polygon, mapping
+from shapely.geometry import LineString
 
 """
 Getting the bounding box for an individual cruise for stac catalog. 
@@ -40,20 +41,8 @@ class GeospatialManager:
             if np.isnan(latitude).any() or np.isnan(longitude).any():
                 raise RuntimeError("There was missing lat-lon dataset")
             geom = LineString(list(zip(longitude, latitude)))
-            # print(len(geom.coords))
             gdf = gpd.GeoDataFrame({"geometry": [geom]}, crs="EPSG:4326")
             bounds = gdf.bounds
-            footprint = Polygon(
-                [
-                    [
-                        bounds.minx.values[0],
-                        bounds.miny.values[0],
-                    ],  # TODO: verify this...
-                    [bounds.minx.values[0], bounds.maxy.values[0]],
-                    [bounds.maxx.values[0], bounds.maxy.values[0]],
-                    [bounds.maxx.values[0], bounds.miny.values[0]],
-                ]
-            )
             bounding_box = [
                 bounds.minx.values[0],
                 bounds.miny.values[0],
@@ -65,11 +54,18 @@ class GeospatialManager:
                 tolerance=self.simplification_tolerance,
                 preserve_topology=False,  # 113
             )  # 1=36k,
-            gdf_simplified = gpd.GeoDataFrame(
-                {"geometry": [geom_simplified]}, crs="EPSG:4326"
+            geom_simplified2 = shapely.set_precision(geom_simplified, 1e-5)
+            gdf_simplified3 = gpd.GeoDataFrame(
+                {"geometry": [geom_simplified2]}, crs="EPSG:4326"
             )
             ###
-            return bounding_box, mapping(footprint), gdf_simplified.to_json()
+            # TODO: add details to geo dict
+            #  'type': 'LineString'}, 'id': '0', 'properties': {}, 'type': 'Feature'}], 'type': 'FeatureCollection'}
+            return bounding_box, gdf_simplified3.to_geo_dict()
+            # ).to_geo_dict()
+            #
+            # Geometry: type: coordinates: collection
+            #
             # ['minx', 'miny', 'maxx', 'maxy'] [0 -75.886169  34.613171 -65.729599  44.36824]
 
         except Exception as error:

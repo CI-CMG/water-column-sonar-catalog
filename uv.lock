@@ -1289,7 +1289,7 @@ wheels = [
 
 [[package]]
 name = "water-column-sonar-catalog"
-version = "26.2.0"
+version = "26.2.1"
 source = { virtual = "." }
 dependencies = [
     { name = "geopandas" },
@@ -1299,7 +1299,6 @@ dependencies = [
     { name = "s3fs" },
     { name = "shapely" },
     { name = "xarray" },
-    { name = "xpystac" },
     { name = "zarr" },
 ]
 
@@ -1323,7 +1322,6 @@ requires-dist = [
     { name = "s3fs" },
     { name = "shapely" },
     { name = "xarray" },
-    { name = "xpystac" },
     { name = "zarr" },
 ]
 
@@ -1404,19 +1402,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/f5/85/113ff1e2cde9e8a5b13c2f0ef4e9f5cd6ca3a036b6452f4dd523419289b5/xarray-2026.1.0.tar.gz", hash = "sha256:0c9814761f9d9a9545df37292d3fda89f83201f3e02ae0f09f03313d9cfdd5e2", size = 3107024 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7d/8e/952a351c10df395d9bab850f611f4368834ae9104d6449049f5a49e00925/xarray-2026.1.0-py3-none-any.whl", hash = "sha256:5fcc03d3ed8dfb662aa254efe6cd65efc70014182bbc2126e4b90d291d970d41", size = 1403009 },
-]
-
-[[package]]
-name = "xpystac"
-version = "0.5.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pystac" },
-    { name = "xarray" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/1b/d5/25b563d527ead74be48dd35702405851aa9de31c9dff4c74694f3a37cecd/xpystac-0.5.0.tar.gz", hash = "sha256:d146e4e922f70918a7bea322c652b9da719fd6090a35f87aa21e2a83622b7238", size = 150247 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/d2/9e/bb060b9c922e55cd069453401525e1e7b62edf59352c334f1035a906f602/xpystac-0.5.0-py3-none-any.whl", hash = "sha256:4f0ed5994bf0fc87eb1dd6dbb1252103aa34cb1ad58c42e38f3eb214067279fa", size = 9403 },
 ]
 
 [[package]]

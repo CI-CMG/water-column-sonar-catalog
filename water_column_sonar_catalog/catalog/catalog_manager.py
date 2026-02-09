@@ -72,6 +72,7 @@ class CatalogManager:
         """Cruise Level 2 Zarr store Catalog"""
         try:
             ################################ --- CATALOG --- ################################
+            # TODO: consolidate into one catalog with three levels
             level_2_catalog = pystac.Catalog(
                 id=f"water-column-sonar-{self.level}",
                 description="Level 2 Water Column Sonar Data from the NOAA's National Centers for Environmental Information",
@@ -80,7 +81,7 @@ class CatalogManager:
                 catalog_type=self.catalog_type,
             )
 
-            # iterate here?
+            # TODO: iterate here through all of the cruises?
 
             ### Read in cruise zarr store ###
             cruise_manager = CruiseManager(
@@ -100,7 +101,7 @@ class CatalogManager:
                 cruise_name=self.cruise_name,
                 instrument_name=self.instrument_name,
             )
-            bbox, footprint, geojson = geospatial_manager.get_bounding_box()
+            bbox, geojson = geospatial_manager.get_bounding_box()
 
             ### date range ###
             start_datetime = pd.Timestamp(cruise.time.values[0])
@@ -153,7 +154,8 @@ class CatalogManager:
             ################################ --- ITEM --- ################################
             level_2_item = pystac.Item(
                 id=f"{self.instrument_name}",
-                geometry=geojson,  # TODO: this is invalid?
+                # Defines the full footprint of the asset represented by this item, formatted according to RFC 7946, section 3.1 (GeoJSON).
+                geometry=geojson,  # TODO: invalid
                 bbox=bbox,
                 datetime=None,  # start_datetime, # opting to leave this blank
                 properties=dict(

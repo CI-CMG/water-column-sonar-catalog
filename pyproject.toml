@@ -1,6 +1,6 @@
 [project]
 name = "water_column_sonar_catalog"
-version = "26.2.0"
+version = "26.2.1"
 authors = [
     { name = "Rudy Klucik", email = "rudy.klucik@noaa.gov" },
 ]
@@ -27,7 +27,6 @@ dependencies = [
     "s3fs",
     "shapely",
     "xarray",
-    "xpystac",
     "zarr",
 ]
 
