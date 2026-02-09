@@ -61,9 +61,10 @@ class GeospatialManager:
             ###
             # TODO: add details to geo dict
             #  'type': 'LineString'}, 'id': '0', 'properties': {}, 'type': 'Feature'}], 'type': 'FeatureCollection'}
-            return bounding_box, gdf_simplified3.to_geo_dict()["features"][
-                0
-            ]  # gdf_simplified3.to_geo_dict()
+            return bounding_box, gdf_simplified3.to_geo_dict()["features"][0][
+                "geometry"
+            ]
+            # gdf_simplified3.to_geo_dict()
             # return bounding_box, shapely.from_geojson(
             #     gdf_simplified3.get_geometry(0).to_json(drop_id=True, to_wgs84=True)
             # )
