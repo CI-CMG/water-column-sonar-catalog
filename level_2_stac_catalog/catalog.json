@@ -8,7 +8,7 @@
       "rel": "root",
       "href": "./catalog.json",
       "type": "application/json",
-      "title": "Water Column Sonar Level 2 Data"
+      "title": "Water Column Sonar Level 2"
     },
     {
       "rel": "child",
@@ -17,5 +17,5 @@
       "title": "Henry_B._Bigelow HB1906 Zarr Stores"
     }
   ],
-  "title": "Water Column Sonar Level 2 Data"
+  "title": "Water Column Sonar Level 2"
 }

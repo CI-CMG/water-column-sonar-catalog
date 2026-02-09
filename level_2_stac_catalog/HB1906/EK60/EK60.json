@@ -1,7 +1,10 @@
 {
   "type": "Feature",
   "stac_version": "1.1.0",
-  "stac_extensions": [],
+  "stac_extensions": [
+    "https://stac-extensions.github.io/scientific/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/file/v2.1.0/schema.json"
+  ],
   "id": "EK60",
   "geometry": {
     "type": "LineString",
@@ -5297,7 +5300,6 @@
   "properties": {
     "ship_name": "Henry_B._Bigelow",
     "cruise_name": "HB1906",
-    "instrument_name": "EK60",
     "level": "level_2a",
     "calibrated": true,
     "start_datetime": "2019-09-03T17:19:01.176990976Z",
@@ -5315,15 +5317,21 @@
         "url": "https://www.omao.noaa.gov/marine-operations/ships/henry-b-bigelow"
       }
     ],
-    "updated": "2026-02-08T21:32:24.024079Z",
+    "updated": "2026-02-09T01:01:44.630597Z",
+    "sci:doi": "10.25921/vt45-sa66",
+    "sci:citation": "NOAA Northeast Fisheries Science Center. 2019. 'EK60 Water Column Sonar Data Collected During HB1906'. NOAA National Centers for Environmental Information.",
     "datetime": "2019-09-03T17:19:01.176990976Z"
   },
   "links": [
     {
+      "rel": "cite-as",
+      "href": "https://doi.org/10.25921/vt45-sa66"
+    },
+    {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
-      "title": "Water Column Sonar Level 2 Data"
+      "title": "Water Column Sonar Level 2"
     },
     {
       "rel": "collection",
@@ -5344,7 +5352,9 @@
       "type": "application/vnd+zarr",
       "title": "level_2a Henry_B._Bigelow HB1906 EK60 Zarr Store",
       "description": "Consolidated cruise-level Zarr store",
+      "file:size": 172145405716,
       "roles": [
+        "data",
         "latest-version"
       ]
     }

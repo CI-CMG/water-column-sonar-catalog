@@ -1,17 +1,20 @@
 import datetime
-from tempfile import TemporaryDirectory
 
 import pandas as pd
 import pystac
 import xarray as xr
-from catalog.providers import Providers
 
-# from catalog import Providers
-# from catalog import Providers
-# from water_column_sonar_catalog.catalog import Providers
-# from water_column_sonar_catalog.cruise import CruiseManager
+# from pystac.extensions.label import (
+#     LabelClasses,
+#     LabelExtension,
+#     LabelTask,
+#     LabelType,
+# )
+from catalog.providers import Providers
 from cruise.cruise_manager import CruiseManager
 from geospatial.geospatial_manager import GeospatialManager
+from pystac.extensions.file import FileExtension
+from pystac.extensions.scientific import ScientificExtension
 
 """
 Creating metadata catalog:
@@ -19,15 +22,7 @@ https://pystac.readthedocs.io/en/latest/tutorials/how-to-create-stac-catalogs.ht
 https://stacspec.org/en/tutorials/4-create-stac-collection/ 
 """
 
-tmp_dir = TemporaryDirectory()
 
-
-# img_path1 = os.path.join(tmp_dir.name, 'image1.tif')
-# url1 = 'https://www.ncei.noaa.gov/sites/default/files/2022-03/AllBeamCurtains_griddedMultibeam-102-file-good-bathy442x185.jpg'
-# urllib.request.urlretrieve(url1, img_path1)
-
-
-# good tutorial https://stacspec.org/en/tutorials/4-create-stac-collection/
 class CatalogManager:
     def __init__(
         self,
@@ -76,7 +71,7 @@ class CatalogManager:
             level_2_catalog = pystac.Catalog(
                 id=f"water-column-sonar-{self.level}",
                 description="Level 2 Water Column Sonar Data from the NOAA's National Centers for Environmental Information",
-                title="Water Column Sonar Level 2 Data",
+                title="Water Column Sonar Level 2",
                 href="https://www.ncei.noaa.gov/products/water-column-sonar-data",
                 catalog_type=self.catalog_type,
             )
@@ -136,6 +131,7 @@ class CatalogManager:
                 providers=[
                     Providers.provider_noaa.value,
                     Providers.provider_ncei.value,
+                    Providers.provider_nefsc.value,
                     Providers.provider_mgg.value,
                     Providers.provider_cires.value,
                     Providers.provider_henry_bigelow.value,
@@ -148,20 +144,20 @@ class CatalogManager:
                 title=f"{self.level} {self.ship_name} {self.cruise_name} {self.instrument_name} Zarr Store",
                 description="Consolidated cruise-level Zarr store",
                 media_type=pystac.MediaType.ZARR,
-                roles=["latest-version"],
+                roles=["data", "latest-version"],
             )
 
             ################################ --- ITEM --- ################################
             level_2_item = pystac.Item(
                 id=f"{self.instrument_name}",
                 # Defines the full footprint of the asset represented by this item, formatted according to RFC 7946, section 3.1 (GeoJSON).
-                geometry=geojson,  # TODO: invalid
+                geometry=geojson,
                 bbox=bbox,
                 datetime=None,  # start_datetime, # opting to leave this blank
                 properties=dict(
                     ship_name=self.ship_name,
                     cruise_name=self.cruise_name,
-                    instrument_name=self.instrument_name,
+                    # instrument_name=self.instrument_name,
                     level=self.level,
                     calibrated=True,
                 ),
@@ -170,13 +166,14 @@ class CatalogManager:
                 href=f"https://{self.bucket_name}.s3.amazonaws.com/{self.level}/{self.ship_name}/{self.cruise_name}/{self.instrument_name}/{self.cruise_name}.zarr/",
                 collection=level_2_collection,
                 assets=dict(zarr=level_2_asset_zarr),
+                # stac_extensions=di,
             )
             level_2_item.common_metadata.instruments = ["EK60"]
             level_2_item.common_metadata.providers = [
                 Providers.provider_henry_bigelow.value
             ]
             level_2_item.common_metadata.updated = datetime.datetime.now()
-            level_2_item.datetime = start_datetime
+            level_2_item.datetime = start_datetime  # start of cruise
 
             ### thumbnail ###
             level_2_asset_thumbnail = pystac.Asset(
@@ -188,14 +185,29 @@ class CatalogManager:
             )
             level_2_collection.add_asset(key="thumbnail", asset=level_2_asset_thumbnail)
             #
+            ################################ --- EXTENSIONS --- ################################
+            # Notes: https://sparkgeo.com/blog/stac-it-up-a-stac-tutorial/
+            #
+            ### doi citation ### https://github.com/stac-extensions/scientific
+            # level_2_item.validate()
+            item_sci = ScientificExtension.ext(level_2_item, add_if_missing=True)
+            item_sci.doi = "10.25921/vt45-sa66"
+            item_sci.citation = "NOAA Northeast Fisheries Science Center. 2019. 'EK60 Water Column Sonar Data Collected During HB1906'. NOAA National Centers for Environmental Information."
+            #
+            level_2_item.validate()
+            ### file extension ###
+            asset_file_extension = FileExtension.ext(
+                level_2_asset_zarr, add_if_missing=True
+            )  # TODO: need to move above!!!!
+            asset_file_extension.size = cruise.nbytes  # TODO: add file:checksum
+            level_2_item.validate()
+            #
             ################################ --- ATTACH --- ################################
             level_2_collection.add_item(level_2_item)
             level_2_catalog.add_child(level_2_collection)
             #
-            # level_2_catalog.normalize_hrefs(os.path.join(tmp_dir.name, "stac"))
             level_2_catalog.normalize_hrefs("../../level_2_stac_catalog")
             level_2_catalog.save(catalog_type=pystac.CatalogType.SELF_CONTAINED)
-            # .RELATIVE_PUBLISHED)
             return level_2_catalog
         except Exception as error:
             raise Exception(f"Problem creating catalog: {error}")
