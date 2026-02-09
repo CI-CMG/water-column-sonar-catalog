@@ -176,6 +176,7 @@ class CatalogManager:
                 Providers.provider_henry_bigelow.value
             ]
             level_2_item.common_metadata.updated = datetime.datetime.now()
+            level_2_item.datetime = start_datetime
 
             ### thumbnail ###
             level_2_asset_thumbnail = pystac.Asset(
