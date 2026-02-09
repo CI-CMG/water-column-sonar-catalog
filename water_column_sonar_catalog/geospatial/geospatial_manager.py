@@ -61,15 +61,11 @@ class GeospatialManager:
             ###
             # TODO: add details to geo dict
             #  'type': 'LineString'}, 'id': '0', 'properties': {}, 'type': 'Feature'}], 'type': 'FeatureCollection'}
-            # return bounding_box, gdf_simplified3.to_geo_dict()
-            return bounding_box, gdf_simplified3.get_geometry(0).to_json(
-                drop_id=True, to_wgs84=True
-            )
+            return bounding_box, gdf_simplified3.to_geo_dict()
+            # return bounding_box, shapely.from_geojson(
+            #     gdf_simplified3.get_geometry(0).to_json(drop_id=True, to_wgs84=True)
+            # )
             # ).to_geo_dict()
-            #
-            # Geometry: type: coordinates: collection
-            #
-            # ['minx', 'miny', 'maxx', 'maxy'] [0 -75.886169  34.613171 -65.729599  44.36824]
 
         except Exception as error:
             raise Exception(f"Problem: {error}")
