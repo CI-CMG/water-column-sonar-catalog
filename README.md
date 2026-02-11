@@ -5,11 +5,14 @@
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/CI-CMG/water-column-sonar-catalog/test_action.yaml)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/CI-CMG/water-column-sonar-catalog) ![GitHub repo size](https://img.shields.io/github/repo-size/CI-CMG/water-column-sonar-catalog)
 
-# Browser
+# Browser Catalog
 
-Copy url of stac catalog and
+Url:
+https://radiantearth.github.io/stac-browser/#/external/noaa-wcsd-pds-index.s3.us-east-1.amazonaws.com/catalog/catalog.json?.language=en
+(bucket and thumbnails at noaa-wcsd-pds-index)
+
+Entry url:
 goto: https://radiantearth.github.io/stac-browser/#/?.language=en
-or: https://radiantearth.github.io/stac-browser/#/external/raw.githubusercontent.com/CI-CMG/water-column-sonar-catalog/refs/heads/main/level_2_stac_catalog/HB1906/collection.json
 
 # Ecosystem
 
